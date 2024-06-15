@@ -75,7 +75,7 @@ set "tempGameFile=temp_game.bat"
     echo .                 ============================
     echo .                          :)               
     echo .                   press 1 to Click      
-    echo .                   press 2 to go to shop  if this is here it worked
+    echo .                   press 2 to go to shop  
     echo .                   press 3 for credits   
     echo .                   press 4 for stats  
     echo .                   press 5 for settings
