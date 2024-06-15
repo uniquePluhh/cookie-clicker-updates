@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 :: Define the URL of the latest version file and game script
-set "updateUrl=https://raw.githubusercontent.com/uniquePluhh/cookie-clicker-updates/main/latest_version.txt.txt"
+set "updateUrl=raw.githubusercontent.com/uniquePluhh/cookie-clicker-updates/main/latest_version.txt.txt"
 set "gameUrl=https://github.com/uniquePluhh/cookie-clicker-updates/blob/main/game.bat.txt"
 set "localVersionFile=version.txt"
 set "tempVersionFile=temp_version.txt"
