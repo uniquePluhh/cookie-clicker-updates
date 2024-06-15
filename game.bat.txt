@@ -2,14 +2,16 @@
 setlocal enabledelayedexpansion
 
 :: Define the URL of the latest version file and game script
-set "updateUrl=raw.githubusercontent.com/uniquePluhh/cookie-clicker-updates/main/latest_version.txt.txt"
-set "gameUrl=raw.githubusercontent.com/uniquePluhh/cookie-clicker-updates/main/game.bat.txt"
+set "updateUrl=https://raw.githubusercontent.com/uniquePluhh/cookie-clicker-updates/main/latest_version.txt.txt"
+set "gameUrl=https://raw.githubusercontent.com/uniquePluhh/cookie-clicker-updates/main/game.bat.txt"
 set "localVersionFile=version.txt"
 set "tempVersionFile=temp_version.txt"
 set "tempGameFile=temp_game.bat"
 
 :: Function to check for updates
 :check_for_updates
+    echo Checking for updates...
+    
     :: Download the latest version file
     powershell -Command "(New-Object Net.WebClient).DownloadFile('%updateUrl%', '%tempVersionFile%')"
 
@@ -41,392 +43,330 @@ set "tempGameFile=temp_game.bat"
         echo %latestVersion% > %localVersionFile%
 
         echo Update completed successfully.
-        pause
-        exit
     ) else (
         echo No update necessary. You are running the latest version.
     )
-    goto start
 
-:: Check for updates at the beginning
-call :check_for_updates
+:: Start the game after checking for updates
+:start_game
+    echo Starting game...
+    timeout /t 100
+    call :game_menu
+    exit /b
 
-:::start of script function for title color and setting the value for all things 
-mode con: cols=70 lines=30
-title Clicking Simulator
-set Light=A
-set light2=0
-color %light2%%light%
-set Clicks=0
-set cp=1
-set TimeSpent=Unknown 
-set TotalClicks=0
-goto start
+:: Game menu function
+:game_menu
+    mode con: cols=70 lines=30
+    title Clicking Simulator
+    set Light=A
+    set light2=0
+    color %light2%%light%
+    set Clicks=0
+    set cp=1
+    set TimeSpent=Unknown 
+    set TotalClicks=0
 
-:::cookie clicker menu main game UI
+    :start
+    cls
+    echo .                 ============================
+    echo .                  ***Title Cookie Clicker***
+    echo .                 ============================
+    echo .                     current clicks: %Clicks%
+    echo .                 ============================
+    echo .                          :)               
+    echo .                   press 1 to Click      
+    echo .                   press 2 to go to shop 
+    echo .                   press 3 for credits   
+    echo .                   press 4 for stats  
+    echo .                   press 5 for settings
+    echo .   
+    echo .                 ============================
 
-:start
-mode con: cols=70 lines=30
-cls
-echo .                 ============================
-echo .                  ***Title Cookie Clicker***
-echo .                 ============================
-echo .                     current clicks: %Clicks%
-echo .                 ============================
-echo .                          :)               
-echo .                   press 1 to Click      
-echo .                   press 2 to go to shop 
-echo .                   press 3 for credits   
-echo .                   press 4 for stats  
-echo .                   press 5 for settings
-echo .   
-echo .                 ============================
-
-:::input to play the game to change clicks value by 1 or cp value 
-
-set /p input=choose input: 
-if "%input%"=="1" (
-    set /a Clicks+="%cp%"
-    set /a TotalClicks+="%cp%"
-    goto start
-) else (
-    if "%input%"=="2" (
-        goto shop
+    set /p input=choose input: 
+    if "%input%"=="1" (
+        set /a Clicks+="%cp%"
+        set /a TotalClicks+="%cp%"
+        goto start
     ) else (
-        if "%input%"=="3" (
-            goto credits
+        if "%input%"=="2" (
+            goto shop
         ) else (
-            if "%input%"=="4" (
-                goto stats 
+            if "%input%"=="3" (
+                goto credits
             ) else (
-                if "%input%"=="5" (
-                    goto settings
+                if "%input%"=="4" (
+                    goto stats 
                 ) else (
-                    goto start
+                    if "%input%"=="5" (
+                        goto settings
+                    ) else (
+                        goto start
+                    )
                 )
             )
         )
     )
-)
 
-:::shop menu 
+    :shop
+    cls
+    echo .                    ============================
+    echo .                      current clicks: %Clicks%
+    echo .                    ============================
+    echo .                                        
+    echo .                     press 1 upgrade cp +1 $5
+    echo .                     press 2 upgrade cp +2 $25                     
+    echo .                     press 3 upgrade cp +3 $75                         
+    echo .                     press 4 exit 
+    echo .       
+    echo .                    ============================
 
-:shop
-cls
-echo .                    ============================
-echo .                      current clicks: %Clicks%
-echo .                    ============================
-echo .                                        
-echo .                     press 1 upgrade cp +1 $5
-echo .                     press 2 upgrade cp +2 $25                     
-echo .                     press 3 upgrade cp +3 $75                         
-echo .                     press 4 exit 
-echo .       
-echo .                    ============================
-
-:::input for shop menu to buy or leave
-
-set /p input=choose input:
-if "%input%"=="1" (
-    if %Clicks% GEQ 5 (
-        set /a cp+=1
-        set /a Clicks-=5
+    set /p input=choose input:
+    if "%input%"=="1" (
+        if %Clicks% GEQ 5 (
+            set /a cp+=1
+            set /a Clicks-=5
+        )
+    ) else if "%input%"=="2" (
+        if %Clicks% GEQ 25 (
+            set /a cp+=2
+            set /a Clicks-=25
+        )
+    ) else if "%input%"=="3" (
+        if %Clicks% GEQ 75 (
+            set /a cp+=3
+            set /a Clicks-=75
+        )
+    ) else if "%input%"=="4" (
+        goto start
     ) else (
         goto shop
     )
-) else if "%input%"=="2" (
-    if %Clicks% GEQ 25 (
-        set /a cp+=2
-        set /a Clicks-=25
-    ) else (
-        goto shop
-    )
-) else if "%input%"=="3" (
-    if %Clicks% GEQ 75 (
-        set /a cp+=3
-        set /a Clicks-=75
-    ) else (
-        goto shop
-    )
-) else if "%input%"=="4" (
-    goto start
-) else (
+
     goto shop
-)
 
-goto shop
+    :stats
+    cls
+    color C 
+    echo .                ============================
+    echo .                          stats
+    echo .                ============================
+    echo .
+    echo .                  current clk %Clicks%     
+    echo .                  total clk %TotalClicks%           
+    echo .                  total cp %cp%     
+    echo .                  time Spent %TimeSpent%                      
+    echo .                  press 1 exit 
+    echo .         
+    echo .                ============================
 
-:::stats menu 
+    set /p input=choose input:
+    if "%input%"=="1" (
+        color %light%
+        goto start
+    ) else (
+        goto stats
+    )
 
-:stats
-cls
-color C 
-echo .                ============================
-echo .                          stats
-echo .                ============================
-echo .
-echo .                  current clk %Clicks%     
-echo .                  total clk %TotalClicks%           
-echo .                  total cp %cp%     
-echo .                  time Spent %TimeSpent%                      
-echo .                  press 1 exit 
-echo .         
-echo .                ============================
-
-:::input for stats menu to leave 
-
-set /p input=choose input:
-if "%input%"=="1" (
-    color %light%
-    goto start
-) else (
-    goto stats
-)
-
-:::credits menu 
-
-:credits
-mode con: cols=120 lines=90
-cls
-color C 
-echo .                 ============================
-echo .                if u found this your my friend
-echo .                 ============================
-echo .                
-echo .
-echo .         
-echo .                
-echo .
-echo .
-echo .
-echo .       
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .                    theres nothing here
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .                    why do u keep going??
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .                       why u here?
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .                    why do u keep going??
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                       why u here?
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                 ============================
-echo .                       ***GAME CREDITS***
-echo .                       devpass = unique
-echo .                 ============================
-echo .
-echo .                 Game Title: Cookie Clicker                        
-echo .                   
-echo .                 Developed by: Unique                         
-echo .                                         
-echo .                 Contributors:           
-echo .                 - unique                        
-echo .                 - chatgpt            
-echo .                                         
-echo .                 Special Thanks:            
-echo .                 - chatgpt for helping fix bugs                       
-echo .                 - Dreamer to helping give ideas            
-echo .                 - Stackoverflow.com for Code                      
-echo .                 
-echo .                 Software used:            
-echo .                 - Visual Studio Code                        
-echo .                 - Batch            
-echo .                                         
-echo .                 Scripters:            
-echo .                 - unique                        
-echo .                 - chatgpt            
-echo .                                         
-echo .                 Music/Sound Effects            
+    :credits
+    mode con: cols=120 lines=90
+    cls
+    color C 
+    echo .                 ============================
+    echo .                if u found this your my friend
+    echo .                 ============================
+    echo .                
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .       
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .                    theres nothing here
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .                    why do u keep going??
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .                       why u here?
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .                    theres nothing here
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .                       why u here?
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                 ============================
+    echo .                       ***GAME CREDITS***
+    echo .                       devpass = unique
+    echo .                 ============================
+    echo .
+    echo .                 Game Title: Cookie Clicker                        
+    echo .                   
+    echo .                 Developed by: Unique                         
+    echo .                                         
+    echo .                 Contributors:           
+    echo .                 - unique                        
+    echo .                 - chatgpt            
+    echo .                                         
+    echo .                 Special Thanks:            
+    echo .                 - chatgpt for helping fix bugs                       
+    echo .                 - Dreamer to helping give ideas            
+    echo .                 - Stackoverflow.com for Code                      
+    echo .                 
+    echo .                 Software used:            
+    echo .                 - Visual Studio Code                        
+    echo .                 - Batch            
+    echo .                                         
+    echo .                 Scripters:            
+    echo .                 - unique                        
+    echo .                 - chatgpt            
+    echo .                                         
+    echo .                 Music/Sound Effects            
 echo .                 - there's no music atm                        
 echo .                             
 echo .                 Inspiration                        
@@ -455,6 +395,7 @@ echo .
 echo .                  scroll up for more info                                   
 echo .                  press 1 exit  
 echo .         
+echo .
 echo .                 ============================
 echo .                
 echo .
@@ -477,8 +418,7 @@ echo .
 echo .
 echo .
 
-:::input for credits menu to leave credits
-
+:: Input for credits menu to leave credits
 set /p input=choose input: 
 if "%input%"=="1" (
     color %light%
@@ -487,8 +427,7 @@ if "%input%"=="1" (
     goto credits
 )
 
-:::settings menu for going to dev menu or changing the UI color
-
+:: Settings menu for going to dev menu or changing the UI color
 :settings
 cls
 echo .                 ============================
@@ -504,8 +443,7 @@ echo .                   press 5 exit
 echo .
 echo .                 ============================
 
-:::color input code for setting color code to input
-
+:: Color input code for setting color code to input
 set /p input=choose input: 
 if "%input%"=="1" (
     echo color options only type 1 number/letter not 2 - color atm %light% background atm %light2%
@@ -537,8 +475,7 @@ if "%input%"=="1" (
     )
 )
 
-:::sorting code for color input 
-
+:: Sorting code for color input 
 set /p input=choose input: 
 if "%input%"=="A" (
     set light=A
@@ -632,8 +569,7 @@ if "%input%"=="A" (
     )
 )
 
-:::dev menu for developers 
-
+:: Dev menu for developers 
 :dev
 cls
 echo .                 ============================
