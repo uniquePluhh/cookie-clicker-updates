@@ -7,6 +7,8 @@ set "gameUrl=https://raw.githubusercontent.com/uniquePluhh/cookie-clicker-update
 set "localVersionFile=version.txt"
 set "tempVersionFile=temp_version.txt"
 set "tempGameFile=temp_game.bat"
+set "saveFile=save_game.txt"
+set "autosaveInterval=300" :: Auto-save interval in seconds
 
 :: Function to check for updates
 :check_for_updates
@@ -47,10 +49,34 @@ set "tempGameFile=temp_game.bat"
         echo No update necessary. You are running the latest version.
     )
 
+:: Function to save the game state
+:save_game
+    echo Saving game...
+    (
+        echo Clicks=%Clicks%
+        echo cp=%cp%
+        echo TotalClicks=%TotalClicks%
+        echo TimeSpent=%TimeSpent%
+    ) > %saveFile%
+    echo Game saved.
+    goto :EOF
+
+:: Function to load the game state
+:load_game
+    if exist %saveFile% (
+        echo Loading game...
+        for /f "tokens=1,2 delims==" %%a in (%saveFile%) do (
+            set %%a=%%b
+        )
+        echo Game loaded.
+    )
+    goto :EOF
+
 :: Start the game after checking for updates
 :start_game
+    call :load_game
     echo Starting game...
-    timeout /t 100
+    timeout /t 5
     call :game_menu
     exit /b
 
@@ -61,10 +87,10 @@ set "tempGameFile=temp_game.bat"
     set Light=A
     set light2=0
     color %light2%%light%
-    set Clicks=0
-    set cp=1
-    set TimeSpent=Unknown 
-    set TotalClicks=0
+    if not defined Clicks set Clicks=0
+    if not defined cp set cp=1
+    if not defined TimeSpent set TimeSpent=Unknown 
+    if not defined TotalClicks set TotalClicks=0
 
     :start
     cls
@@ -75,9 +101,9 @@ set "tempGameFile=temp_game.bat"
     echo .                 ============================
     echo .                          :)               
     echo .                   press 1 to Click      
-    echo .                   press 2 to go to shop  
-    echo .                   press 3 for credits  
-    echo .                   press 4 for stats 
+    echo .                   press 2 to go to shop 
+    echo .                   press 3 for credits   
+    echo .                   press 4 for stats  
     echo .                   press 5 for settings
     echo .   
     echo .                 ============================
@@ -86,6 +112,7 @@ set "tempGameFile=temp_game.bat"
     if "%input%"=="1" (
         set /a Clicks+="%cp%"
         set /a TotalClicks+="%cp%"
+        call :save_game
         goto start
     ) else (
         if "%input%"=="2" (
@@ -125,16 +152,19 @@ set "tempGameFile=temp_game.bat"
         if %Clicks% GEQ 5 (
             set /a cp+=1
             set /a Clicks-=5
+            call :save_game
         )
     ) else if "%input%"=="2" (
         if %Clicks% GEQ 25 (
             set /a cp+=2
             set /a Clicks-=25
+            call :save_game
         )
     ) else if "%input%"=="3" (
         if %Clicks% GEQ 75 (
             set /a cp+=3
             set /a Clicks-=75
+            call :save_game
         )
     ) else if "%input%"=="4" (
         goto start
@@ -220,15 +250,6 @@ set "tempGameFile=temp_game.bat"
     echo .
     echo .
     echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
     echo .                    theres nothing here
     echo .                
     echo .
@@ -244,20 +265,9 @@ set "tempGameFile=temp_game.bat"
     echo .
     echo .
     echo .
-    echo .                
-    echo .
-    echo .
     echo .
     echo .                
     echo .
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .                
     echo .
     echo .
     echo .
@@ -272,10 +282,6 @@ set "tempGameFile=temp_game.bat"
     echo .
     echo .
     echo .
-    echo .                
-    echo .
-    echo .
-    echo .
     echo .                       why u here?
     echo .
     echo .
@@ -286,15 +292,6 @@ set "tempGameFile=temp_game.bat"
     echo .
     echo .                
     echo .
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                
     echo .
     echo .
     echo .
@@ -309,25 +306,7 @@ set "tempGameFile=temp_game.bat"
     echo .
     echo .
     echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
     echo .                       why u here?
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
     echo .
     echo .
     echo .                
@@ -367,56 +346,56 @@ set "tempGameFile=temp_game.bat"
     echo .                 - chatgpt            
     echo .                                         
     echo .                 Music/Sound Effects            
-echo .                 - there's no music atm                        
-echo .                             
-echo .                 Inspiration                        
-echo .                 - Cookie Clicker             
-echo .                 - Simulator                        
-echo .                 - Lua            
-echo .                 - Batch                        
-echo .                             
-echo .                 Bug Fixers                       
-echo .                 - unique           
-echo .                 - ChatGPT                        
-echo .                 - Stackoverflow.com           
-echo .                                         
-echo .                 Copyright © [2024] [ほかにない/unique]. All rights reserved.          
-echo .                                         
-echo .                               
-echo .                                     
-echo .                    
-echo .                                       
-echo .                           
-echo .                                        
-echo .                            
-echo .                                         
-echo .                             
-echo .                                         
-echo .                  scroll up for more info                                   
-echo .                  press 1 exit  
-echo .         
-echo .
-echo .                 ============================
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
-echo .                
-echo .
-echo .
-echo .
-echo .
+    echo .                 - there's no music atm                        
+    echo .                             
+    echo .                 Inspiration                        
+    echo .                 - Cookie Clicker             
+    echo .                 - Simulator                        
+    echo .                 - Lua            
+    echo .                 - Batch                        
+    echo .                             
+    echo .                 Bug Fixers                       
+    echo .                 - unique           
+    echo .                 - ChatGPT                        
+    echo .                 - Stackoverflow.com           
+    echo .                                         
+    echo .                 Copyright © [2024] [ほかにない/unique]. All rights reserved.          
+    echo .                                         
+    echo .                               
+    echo .                                     
+    echo .                    
+    echo .                                       
+    echo .                           
+    echo .                                        
+    echo .                            
+    echo .                                         
+    echo .                             
+    echo .                                         
+    echo .                  scroll up for more info                                   
+    echo .                  press 1 exit  
+    echo .         
+    echo .
+    echo .                 ============================
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
+    echo .                
+    echo .
+    echo .
+    echo .
+    echo .
 
 :: Input for credits menu to leave credits
 set /p input=choose input: 
@@ -594,10 +573,18 @@ if "%input%"=="5" (
     if "%input%"=="1" (
         set /p clkinput=choose value:
         set /a Clicks="%clkinput%"
+        call :save_game
         goto dev
     ) else (
-        goto dev
-    ) 
+        if "%input%"=="2" (
+            set /p cpinput=choose value:
+            set /a cp="%cpinput%"
+            call :save_game
+            goto dev
+        ) else (
+            goto dev
+        )
+    )
 )
 
 pause >nul
