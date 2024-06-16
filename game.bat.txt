@@ -2,20 +2,25 @@
 setlocal enabledelayedexpansion
 
 :: Define the URL of the latest version file and game script
-set "updateUrl=https://raw.githubusercontent.com/uniquePluhh/cookie-clicker-updates/main/latest_version.txt.txt"
-set "gameUrl=https://raw.githubusercontent.com/uniquePluhh/cookie-clicker-updates/main/game.bat.txt"
+set "updateUrl=https://raw.githubusercontent.com/uniquePluhh/cookie-clicker-updates/main/latest_version.txt"
+set "gameUrl=https://raw.githubusercontent.com/uniquePluhh/cookie-clicker-updates/main/game.bat"
 set "localVersionFile=version.txt"
 set "tempVersionFile=temp_version.txt"
 set "tempGameFile=temp_game.bat"
-set "saveFile=save_game.txt"
-set "autosaveInterval=300" :: Auto-save interval in seconds
+set "saveFile=game_save.txt"
 
 :: Function to check for updates
 :check_for_updates
     echo Checking for updates...
+    pause
     
     :: Download the latest version file
     powershell -Command "(New-Object Net.WebClient).DownloadFile('%updateUrl%', '%tempVersionFile%')"
+    if errorlevel 1 (
+        echo Failed to download the latest version file.
+        pause
+        goto start_game
+    )
 
     :: Read the latest version
     set /p latestVersion=<%tempVersionFile%
@@ -29,13 +34,20 @@ set "autosaveInterval=300" :: Auto-save interval in seconds
 
     echo Latest version: %latestVersion%
     echo Local version: %localVersion%
+    pause
 
     :: Compare versions
     if not "%localVersion%"=="%latestVersion%" (
         echo Update available. Downloading...
+        pause
 
         :: Download the latest game file
         powershell -Command "(New-Object Net.WebClient).DownloadFile('%gameUrl%', '%tempGameFile%')"
+        if errorlevel 1 (
+            echo Failed to download the game file.
+            pause
+            goto start_game
+        )
 
         :: Replace the old game script with the new one
         copy /y %tempGameFile% game.bat
@@ -45,38 +57,32 @@ set "autosaveInterval=300" :: Auto-save interval in seconds
         echo %latestVersion% > %localVersionFile%
 
         echo Update completed successfully.
+        pause
     ) else (
         echo No update necessary. You are running the latest version.
+        pause
     )
-
-:: Function to save the game state
-:save_game
-    echo Saving game...
-    (
-        echo Clicks=%Clicks%
-        echo cp=%cp%
-        echo TotalClicks=%TotalClicks%
-        echo TimeSpent=%TimeSpent%
-    ) > %saveFile%
-    echo Game saved.
-    goto :EOF
-
-:: Function to load the game state
-:load_game
-    if exist %saveFile% (
-        echo Loading game...
-        for /f "tokens=1,2 delims==" %%a in (%saveFile%) do (
-            set %%a=%%b
-        )
-        echo Game loaded.
-    )
-    goto :EOF
 
 :: Start the game after checking for updates
 :start_game
-    call :load_game
     echo Starting game...
-    timeout /t 5
+    timeout /t 2
+
+    :: Load game save if it exists
+    if exist %saveFile% (
+        for /f "tokens=1-4 delims=," %%A in (%saveFile%) do (
+            set Clicks=%%A
+            set cp=%%B
+            set TotalClicks=%%C
+            set TimeSpent=%%D
+        )
+    ) else (
+        set Clicks=0
+        set cp=1
+        set TotalClicks=0
+        set TimeSpent=Unknown 
+    )
+    
     call :game_menu
     exit /b
 
@@ -87,10 +93,6 @@ set "autosaveInterval=300" :: Auto-save interval in seconds
     set Light=A
     set light2=0
     color %light2%%light%
-    if not defined Clicks set Clicks=0
-    if not defined cp set cp=1
-    if not defined TimeSpent set TimeSpent=Unknown 
-    if not defined TotalClicks set TotalClicks=0
 
     :start
     cls
@@ -105,6 +107,7 @@ set "autosaveInterval=300" :: Auto-save interval in seconds
     echo .                   press 3 for credits   
     echo .                   press 4 for stats  
     echo .                   press 5 for settings
+    echo .                   press 6 save & exit 
     echo .   
     echo .                 ============================
 
@@ -112,7 +115,6 @@ set "autosaveInterval=300" :: Auto-save interval in seconds
     if "%input%"=="1" (
         set /a Clicks+="%cp%"
         set /a TotalClicks+="%cp%"
-        call :save_game
         goto start
     ) else (
         if "%input%"=="2" (
@@ -127,7 +129,11 @@ set "autosaveInterval=300" :: Auto-save interval in seconds
                     if "%input%"=="5" (
                         goto settings
                     ) else (
-                        goto start
+                        if "%input%"=="6" (
+                            goto save_and_exit
+                        ) else (
+                            goto start
+                        )
                     )
                 )
             )
@@ -152,19 +158,16 @@ set "autosaveInterval=300" :: Auto-save interval in seconds
         if %Clicks% GEQ 5 (
             set /a cp+=1
             set /a Clicks-=5
-            call :save_game
         )
     ) else if "%input%"=="2" (
         if %Clicks% GEQ 25 (
             set /a cp+=2
             set /a Clicks-=25
-            call :save_game
         )
     ) else if "%input%"=="3" (
         if %Clicks% GEQ 75 (
             set /a cp+=3
             set /a Clicks-=75
-            call :save_game
         )
     ) else if "%input%"=="4" (
         goto start
@@ -244,12 +247,6 @@ set "autosaveInterval=300" :: Auto-save interval in seconds
     echo .
     echo .
     echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
     echo .                    theres nothing here
     echo .                
     echo .
@@ -262,40 +259,12 @@ set "autosaveInterval=300" :: Auto-save interval in seconds
     echo .
     echo .
     echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                    why do u keep going??
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
     echo .
     echo .
     echo .
     echo .                       why u here?
     echo .
     echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                    theres nothing here
     echo .                
     echo .
     echo .
@@ -363,228 +332,99 @@ set "autosaveInterval=300" :: Auto-save interval in seconds
     echo .                                         
     echo .                               
     echo .                                     
-    echo .                    
-    echo .                                       
-    echo .                           
-    echo .                                        
-    echo .                            
-    echo .                                         
-    echo .                             
-    echo .                                         
-    echo .                  scroll up for more info                                   
-    echo .                  press 1 exit  
-    echo .         
-    echo .
+    echo .                                  
+    echo .                               
+    echo .                                  
+    echo .                                     
+    echo .                                     
+    echo .                 press 1 to exit                    
     echo .                 ============================
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-    echo .                
-    echo .
-    echo .
-    echo .
-    echo .
-
-:: Input for credits menu to leave credits
-set /p input=choose input: 
-if "%input%"=="1" (
-    color %light%
-    goto start
-) else (
-    goto credits
-)
-
-:: Settings menu for going to dev menu or changing the UI color
-:settings
-cls
-echo .                 ============================
-echo .                        Settings menu  
-echo .                 ============================
-echo .
-echo .                   press 1 change color                        
-echo .                   press 2 for dev settings  
-echo .                   press 3 for change background / doesn't work
-echo .                   
-echo .                    
-echo .                   press 5 exit  
-echo .
-echo .                 ============================
-
-:: Color input code for setting color code to input
-set /p input=choose input: 
-if "%input%"=="1" (
-    echo color options only type 1 number/letter not 2 - color atm %light% background atm %light2%
     
-    echo 0 = nul        8 = gray
-    echo 1 = blue       9 = light gray
-    echo 2 = green      A = light green
-    echo 3 = aqua       B = light aqua
-    echo 4 = red        C = light red
-    echo 5 = purple     D = light purple
-    echo 6 = yellow     E = light yellow
-    echo 7 = white      F = bright white
-) else (
-    if "%input%"=="5" (
+    set /p input=choose input:
+    if "%input%"=="1" (
+        color %light%
         goto start
     ) else (
-        if "%input%"=="2" (
-            set /p devinput=dev pass: 
-            if "%devinput%"=="unique" (
-                goto dev
-            ) else (
-                if "%input%"=="3" (
-                    goto background 
-                ) else (
-                    goto settings
-                )
-            ) 
-        )
+        goto credits
     )
-)
 
-:: Sorting code for color input 
-set /p input=choose input: 
-if "%input%"=="A" (
-    set light=A
-    color A
-    goto settings
-)else (
-    if "%input%"=="B" (
-        set light=B
-        color B
+    :settings
+    cls
+    echo .                     ============================
+    echo .                          settings
+    echo .                     ============================
+    echo .
+    echo .                       [1] Change Theme
+    echo .                       [2] Other Settings
+    echo .                       [3] Exit
+    echo .                     ============================
+
+    set /p input=choose input:
+    if "%input%"=="1" (
+        goto change_theme
+    ) else if "%input%"=="2" (
+        goto other_settings
+    ) else if "%input%"=="3" (
+        goto start
+    ) else (
+        goto settings
+    )
+
+    :change_theme
+    cls
+    echo .                     ============================
+    echo .                          change theme
+    echo .                     ============================
+    echo .
+    echo .                       [1] Light Theme
+    echo .                       [2] Dark Theme
+    echo .                       [3] Exit
+    echo .                     ============================
+
+    set /p input=choose input:
+    if "%input%"=="1" (
+        set light=A
+        set light2=7
+    ) else if "%input%"=="2" (
+        set light=0
+        set light2=0
+    ) else if "%input%"=="3" (
         goto settings
     ) else (
-        if "%input%"=="C" (
-            set light=C
-            color C
-            goto settings
-        ) else (
-            if "%input%"=="D" (
-                set light=D 
-                color D 
-                goto settings
-            ) else (
-                if "%input%"=="E" (
-                    set light=E 
-                    color E 
-                    goto settings
-                ) else (
-                    if "%input%"=="F" (
-                        set light=F 
-                        color F 
-                        goto settings
-                    ) else (
-                        if "%input%"=="1" (
-                            set light=1
-                            color 1
-                            goto settings
-                        ) else (
-                            if "%input%"=="2" (
-                                set light=2
-                                color 2
-                                goto settings
-                            ) else (
-                                if "%input%"=="3" (
-                                    set light=3
-                                    color 3
-                                    goto settings
-                                ) else (
-                                    if "%input%"=="4" (
-                                        set light=4
-                                        color 4
-                                        goto settings
-                                    ) else (
-                                        if "%input%"=="5" (
-                                            set light=5
-                                            color 5
-                                            goto settings
-                                        ) else (
-                                            if "%Input%"=="6" (
-                                                set light=6 
-                                                color 6
-                                                goto settings
-                                            ) else (
-                                                if "%input%"=="7" (
-                                                    set light=7
-                                                    color 7
-                                                    goto settings
-                                                ) else (
-                                                    if "%input%"=="8" (
-                                                        set light=8
-                                                        color 8
-                                                        goto settings 
-                                                    ) else (
-                                                        if "%input%"=="9" (
-                                                            set light=9
-                                                            color 9
-                                                            goto settings
-                                                        ) else (
-                                                            goto settings
-                                                        )
-                                                    )
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        )
+        goto change_theme
     )
-)
 
-:: Dev menu for developers 
-:dev
-cls
-echo .                 ============================
-echo .                      dev Settings menu  
-echo .                 ============================
-echo .
-echo .                   press 1 change clk value                        
-echo .                   current clk %Clicks%
-echo .                   info do it twice
-echo .                   
-echo .                   press 2 change cp value
-echo .                   current cp %cp%
-echo .                    
-echo .                   press 5 exit  
-echo .
-echo .                 ============================
-
-set /p input=choose input:
-if "%input%"=="5" (
     goto settings
-) else (
-    if "%input%"=="1" (
-        set /p clkinput=choose value:
-        set /a Clicks="%clkinput%"
-        call :save_game
-        goto dev
-    ) else (
-        if "%input%"=="2" (
-            set /p cpinput=choose value:
-            set /a cp="%cpinput%"
-            call :save_game
-            goto dev
-        ) else (
-            goto dev
-        )
-    )
-)
 
-pause >nul
+    :other_settings
+    cls
+    echo .                     ============================
+    echo .                          other settings
+    echo .                     ============================
+    echo .
+    echo .                       [1] Option 1
+    echo .                       [2] Option 2
+    echo .                       [3] Exit
+    echo .                     ============================
+
+    set /p input=choose input:
+    if "%input%"=="1" (
+        echo Option 1 selected
+        pause
+    ) else if "%input%"=="2" (
+        echo Option 2 selected
+        pause
+    ) else if "%input%"=="3" (
+        goto settings
+    ) else (
+        goto other_settings
+    )
+
+    goto settings
+
+    :save_and_exit
+    echo Saving game...
+    echo %Clicks%,%cp%,%TotalClicks%,%TimeSpent% > %saveFile%
+    echo Game saved successfully.
+    pause
+    exit /b
