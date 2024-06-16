@@ -1,1 +1,1 @@
-1.0.5 beta (patch notes: fixing issue with dev pass adding save)
+1.0.6
